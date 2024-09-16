@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Progress Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Welcome, {{ user.username }}!</h1>
+
+    <h2>Your Exam Scores by Subject</h2>
+
+    {% for subject_name, exam_scores in scores_by_subject.items %}
+        <h3>{{ subject_name }}</h3>
+        <table border="1">
+            <tr>
+                <th>Date</th>
+                <th>Score</th>
+            </tr>
+            {% for score in exam_scores %}
+            <tr>
+                <td>{{ score.date_of_exam }}</td>
+                <td>{{ score.score }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <!-- Add a canvas for each subject chart -->
+        <canvas id="chart-{{ forloop.counter }}" width="400" height="200"></canvas>
+    {% endfor %}
+
+    <script>
+        // Loop through each subject and create a separate chart
+        {% for subject_name, exam_scores in scores_by_subject.items %}
+            const ctx{{ forloop.counter }} = document.getElementById('chart-{{ forloop.counter }}').getContext('2d');
+            const chart{{ forloop.counter }} = new Chart(ctx{{ forloop.counter }}, {
+                type: 'line',
+                data: {
+                    labels: [{% for score in exam_scores %}'{{ score.date_of_exam }}',{% endfor %}],  // Dates of exams
+                    datasets: [{
+                        label: '{{ subject_name }} Progress',
+                        data: [{% for score in exam_scores %}{{ score.score }},{% endfor %}],  // Scores of exams
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        {% endfor %}
+    </script>
+
+    <a href="{% url 'add_score' %}">Add a new score</a>
+</body>
+</html>
